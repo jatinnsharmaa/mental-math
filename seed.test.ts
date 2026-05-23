@@ -4,8 +4,8 @@ import { buildQuestions } from './seed';
 describe('buildQuestions', () => {
   const questions = buildQuestions();
 
-  it('produces 986 questions total', () => {
-    expect(questions).toHaveLength(986);
+  it('produces 962 questions total', () => {
+    expect(questions).toHaveLength(962);
   });
 
   it('every question has non-empty required fields', () => {
@@ -32,15 +32,15 @@ describe('buildQuestions', () => {
 
   describe('primes', () => {
     const primes = questions.filter(q => q.category === 'primes');
-    it('has 171 questions (2–293, even numbers skipped above 50)', () => expect(primes).toHaveLength(171));
+    it('has 147 questions (odd numbers 3–293 plus n=2)', () => expect(primes).toHaveLength(147));
     it('2 is prime', () => {
       expect(primes.find(q => q.prompt === 'Is 2 a prime number?')?.answer).toBe('yes');
     });
     it('97 is prime', () => {
       expect(primes.find(q => q.prompt === 'Is 97 a prime number?')?.answer).toBe('yes');
     });
-    it('4 is not prime', () => {
-      expect(primes.find(q => q.prompt === 'Is 4 a prime number?')?.answer).toBe('no');
+    it('9 is not prime', () => {
+      expect(primes.find(q => q.prompt === 'Is 9 a prime number?')?.answer).toBe('no');
     });
     it('91 is not prime', () => {
       expect(primes.find(q => q.prompt === 'Is 91 a prime number?')?.answer).toBe('no');

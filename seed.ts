@@ -22,7 +22,7 @@ export function buildQuestions(): Q[] {
     211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,
   ]);
   for (let n = 2; n <= 293; n++) {
-    if (n > 50 && n % 2 === 0) continue;
+    if (n !== 2 && n % 2 === 0) continue;
     const difficulty = n <= 50 ? 'easy' : n <= 150 ? 'medium' : 'hard';
     questions.push({ category: 'primes', difficulty, prompt: `Is ${n} a prime number?`, answer: PRIME_SET.has(n) ? 'yes' : 'no' });
   }
