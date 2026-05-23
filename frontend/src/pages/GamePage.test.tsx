@@ -68,7 +68,7 @@ describe('GamePage', () => {
   });
 
   it('Stop button flushes pending answers and calls endSession', async () => {
-    const pending = [{ questionId: 1, userAnswer: '56', responseTimeMs: 300 }];
+    const pending: import('../stores/gameStore').PendingAnswer[] = [{ questionId: 1, userAnswer: '56', responseTimeMs: 300 }];
     mockFlushPending.mockReturnValue(pending);
     const onEnd = vi.fn();
     render(<GamePage sessionId={1} onEnd={onEnd} />);
