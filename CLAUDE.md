@@ -25,18 +25,18 @@ supabase/functions/      # Deno Edge Functions (always warm, no cold starts)
     db.ts                # getServiceClient() — Supabase JS client
     distractors.ts       # generateOptions() + formatQuestion()
   sessions/
-    index.ts             # POST /sessions, GET /sessions/:id/next, POST /sessions/:id/answers, POST /sessions/:id/end
+    index.ts             # POST /sessions, POST /sessions/:id/next, POST /sessions/:id/answers/batch, POST /sessions/:id/end
     routes.ts            # matchRoute() — pure function, extracted for unit testing
   analytics/
-    index.ts             # GET /analytics/summary, GET /analytics/daily?days=N
-    aggregate.ts         # aggregateAnswers() + groupByDay() — pure functions
+    index.ts             # GET /analytics/summary, GET /analytics/daily?days=N, GET /analytics/mistakes?days=N&category=X&difficulty=Y
+    aggregate.ts         # aggregateAnswers() + groupByDay() + groupByQuestion() — pure functions
 
 frontend/src/
   App.tsx                # Screen router (login|signup|home|game|results|dashboard) — no React Router
   api/client.ts          # All fetch calls; reads token from authStore; base URL from VITE_API_URL
   stores/
     authStore.ts         # Zustand + persist middleware → localStorage key 'auth'
-    gameStore.ts         # Zustand in-memory; holds questions[], currentIndex, answers[]
+    gameStore.ts         # Zustand in-memory; holds questions[], currentIndex, answers[], pendingAnswers[]
   pages/                 # One file per screen
   components/            # SessionConfig, QuestionCard, Timer, charts/
   types.ts               # Shared TypeScript types
@@ -88,14 +88,18 @@ Navigation is a `useState<Screen>` enum — no React Router. Each page component
 - `authStore` — persisted to `localStorage`. Holds JWT token + user object. Token is read directly (not via hook) inside `api/client.ts` using `useAuthStore.getState()`.
 - `gameStore` — in-memory only. Holds the current question batch, index, and answers for the active session. Reset on new session.
 
-### Endless mode with prefetch
-`GamePage` fetches a batch of 30 questions on session start. When fewer than 8 remain, it prefetches the next batch via `GET /sessions/:id/next`. A `useRef` flag prevents double-fetching.
+### Endless mode with prefetch and answer batching
+`GamePage` fetches a batch of **80 questions** on session start. When fewer than **10 remain**, it prefetches the next batch via `POST /sessions/:id/next`, piggybacking the buffered answers from the current batch in the request body. This reduces API calls from ~105 per 100-question session to ~2-4. A `useRef` flag prevents double-fetching.
+
+Answers are buffered in `gameStore.pendingAnswers` and flushed in two places:
+- With the `/next` prefetch (clears the buffer atomically via `flushPending()`)
+- With the `/end` request (any remaining answers sent alongside the end signal)
 
 ### Answer correctness
-Checked server-side in the Edge Function: `userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase()`. The correct answer is never sent to the client before submission.
+Questions include the `answer` field in the payload so the client can evaluate locally for instant feedback (no round-trip). The server re-validates all answers on batch receipt: `userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()`. The server result is authoritative for storage.
 
 ### Session ownership enforcement
-Every session route (`next`, `answers`, `end`) fetches the session with both `.eq('id', sessionId)` **and** `.eq('userId', user.userId)` before acting on it. Returns 404 on mismatch (not 403, to avoid confirming the session exists). Do not add new session routes without this check.
+Every session route (`next`, `answers/batch`, `end`) fetches the session with both `.eq('id', sessionId)` **and** `.eq('userId', user.userId)` before acting on it. Returns 404 on mismatch (not 403, to avoid confirming the session exists). Do not add new session routes without this check.
 
 ### Options generation
 `_shared/distractors.ts` generates 3 wrong answers then shuffles all four. Strategy varies by category:

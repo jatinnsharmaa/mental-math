@@ -1,4 +1,5 @@
 import { useAuthStore } from '../stores/authStore';
+import type { PendingAnswer } from '../stores/gameStore';
 
 const BASE = import.meta.env.VITE_API_URL as string;
 
@@ -31,17 +32,24 @@ export const api = {
     request<{ sessionId: number; questions: import('../types').Question[] }>(
       '/sessions', { method: 'POST', body: JSON.stringify({ categories, difficulties }) }
     ),
-  fetchNextBatch: (sessionId: number) =>
-    request<{ questions: import('../types').Question[] }>(`/sessions/${sessionId}/next`),
-  submitAnswer: (sessionId: number, questionId: number, userAnswer: string, responseTimeMs: number) =>
-    request<{ isCorrect: boolean; correctAnswer: string }>(
-      `/sessions/${sessionId}/answers`,
-      { method: 'POST', body: JSON.stringify({ questionId, userAnswer, responseTimeMs }) }
+  fetchNextBatch: (sessionId: number, answers: PendingAnswer[] = []) =>
+    request<{ questions: import('../types').Question[] }>(
+      `/sessions/${sessionId}/next`,
+      { method: 'POST', body: JSON.stringify({ answers }) }
     ),
-  endSession: (sessionId: number) =>
-    request<{ endedAt: string }>(`/sessions/${sessionId}/end`, { method: 'POST' }),
+  endSession: (sessionId: number, answers: PendingAnswer[] = []) =>
+    request<{ endedAt: string }>(
+      `/sessions/${sessionId}/end`,
+      { method: 'POST', body: JSON.stringify({ answers }) }
+    ),
   getAnalyticsSummary: () =>
     request<import('../types').AnalyticsSummary>('/analytics/summary'),
   getDailyAnalytics: (days = 7) =>
     request<{ daily: import('../types').DailyStat[] }>(`/analytics/daily?days=${days}`),
+  getMistakes: (days = 30, category?: string, difficulty?: string) => {
+    const params = new URLSearchParams({ days: String(days) });
+    if (category) params.set('category', category);
+    if (difficulty) params.set('difficulty', difficulty);
+    return request<{ mistakes: import('../types').MistakeSummary[] }>(`/analytics/mistakes?${params}`);
+  },
 };

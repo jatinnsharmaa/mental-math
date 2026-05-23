@@ -41,29 +41,68 @@ describe('api.startSession', () => {
 });
 
 describe('api.fetchNextBatch', () => {
-  it('calls GET /sessions/5/next', async () => {
+  it('calls POST /sessions/5/next with empty answers by default', async () => {
     mockOk({ questions: [] });
     await api.fetchNextBatch(5);
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/sessions/5/next'), expect.anything());
-  });
-});
-
-describe('api.submitAnswer', () => {
-  it('calls POST /sessions/1/answers with correct body', async () => {
-    mockOk({ isCorrect: true, correctAnswer: '56' });
-    await api.submitAnswer(1, 2, 'yes', 300);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/sessions/1/answers'),
-      expect.objectContaining({ method: 'POST', body: JSON.stringify({ questionId: 2, userAnswer: 'yes', responseTimeMs: 300 }) })
+      expect.stringContaining('/sessions/5/next'),
+      expect.objectContaining({ method: 'POST', body: JSON.stringify({ answers: [] }) })
+    );
+  });
+
+  it('passes buffered answers in body', async () => {
+    mockOk({ questions: [] });
+    const answers = [{ questionId: 1, userAnswer: '56', responseTimeMs: 400 }];
+    await api.fetchNextBatch(5, answers);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/sessions/5/next'),
+      expect.objectContaining({ body: JSON.stringify({ answers }) })
     );
   });
 });
 
 describe('api.endSession', () => {
-  it('calls POST /sessions/1/end', async () => {
+  it('calls POST /sessions/1/end with empty answers by default', async () => {
     mockOk({ endedAt: '2024-01-01T00:00:00Z' });
     await api.endSession(1);
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/sessions/1/end'), expect.objectContaining({ method: 'POST' }));
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/sessions/1/end'),
+      expect.objectContaining({ method: 'POST', body: JSON.stringify({ answers: [] }) })
+    );
+  });
+
+  it('passes remaining answers in body', async () => {
+    mockOk({ endedAt: '2024-01-01T00:00:00Z' });
+    const answers = [{ questionId: 3, userAnswer: 'yes', responseTimeMs: 200 }];
+    await api.endSession(1, answers);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/sessions/1/end'),
+      expect.objectContaining({ body: JSON.stringify({ answers }) })
+    );
+  });
+});
+
+describe('api.getMistakes', () => {
+  it('calls GET /analytics/mistakes with days param', async () => {
+    mockOk({ mistakes: [] });
+    await api.getMistakes(30);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/analytics/mistakes?days=30'),
+      expect.anything()
+    );
+  });
+
+  it('includes category and difficulty filters when provided', async () => {
+    mockOk({ mistakes: [] });
+    await api.getMistakes(7, 'multiplication', 'hard');
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('category=multiplication'),
+      expect.anything()
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('difficulty=hard'),
+      expect.anything()
+    );
   });
 });
 

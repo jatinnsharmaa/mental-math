@@ -177,5 +177,5 @@ To add a new category:
 2. Update distractor generation in `_shared/distractors.ts`:
    - Integer-answer categories (like squares_cubes, multiplication): use the `correct ± k×10` block — options automatically share the correct answer's last digit
    - Decimal-answer categories (like roots, fractions): add an entry to the `deltas` map with appropriate decimal offsets
-3. Add the category to `CATEGORIES` in `frontend/src/components/SessionConfig.tsx`
+3. Add the category to `CATEGORIES` in `frontend/src/components/SessionConfig.tsx` and in `DashboardPage.tsx`
 4. Re-run `npx tsx seed.ts`

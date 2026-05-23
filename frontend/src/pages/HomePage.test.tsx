@@ -30,6 +30,7 @@ describe('HomePage', () => {
     render(<HomePage onStart={onStart} onDashboard={vi.fn()} />);
 
     fireEvent.click(screen.getByText('Multiplication'));
+    fireEvent.click(screen.getByText('Medium')); // deselect pre-selected medium
     fireEvent.click(screen.getByText('Easy'));
     fireEvent.click(screen.getByRole('button', { name: /start/i }));
 

@@ -24,9 +24,10 @@ describe('SessionConfig', () => {
     expect(screen.getByRole('button', { name: /start/i })).toBeDisabled();
   });
 
-  it('Start button is disabled when only category selected', () => {
+  it('Start button is disabled when only category selected (no difficulty)', () => {
     render(<SessionConfig onStart={vi.fn()} loading={false} />);
     fireEvent.click(screen.getByText('Multiplication'));
+    fireEvent.click(screen.getByText('Medium')); // deselect pre-selected medium
     expect(screen.getByRole('button', { name: /start/i })).toBeDisabled();
   });
 
@@ -42,6 +43,7 @@ describe('SessionConfig', () => {
     render(<SessionConfig onStart={onStart} loading={false} />);
     fireEvent.click(screen.getByText('Multiplication'));
     fireEvent.click(screen.getByText('Primes'));
+    fireEvent.click(screen.getByText('Medium')); // deselect pre-selected medium
     fireEvent.click(screen.getByText('Easy'));
     fireEvent.click(screen.getByRole('button', { name: /start/i }));
     expect(onStart).toHaveBeenCalledWith(['multiplication', 'primes'], ['easy']);

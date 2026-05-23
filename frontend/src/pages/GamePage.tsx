@@ -7,7 +7,7 @@ import { Timer } from '../components/Timer';
 type Props = { sessionId: number; onEnd: () => void };
 
 export function GamePage({ sessionId, onEnd }: Props) {
-  const { questions, currentIndex, nextQuestion, addAnswer, appendQuestions } = useGameStore(s => s);
+  const { questions, currentIndex, nextQuestion, addAnswer, addPending, flushPending, appendQuestions } = useGameStore(s => s);
   const [startedAt, setStartedAt] = useState(Date.now());
   const [pending, setPending] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ isCorrect: boolean; correctAnswer: string } | null>(null);
@@ -17,9 +17,10 @@ export function GamePage({ sessionId, onEnd }: Props) {
   const remaining = questions.length - currentIndex;
 
   useEffect(() => {
-    if (remaining < 8 && !fetching.current) {
+    if (remaining < 10 && !fetching.current) {
       fetching.current = true;
-      api.fetchNextBatch(sessionId)
+      const toFlush = flushPending();
+      api.fetchNextBatch(sessionId, toFlush)
         .then(r => { appendQuestions(r.questions); fetching.current = false; })
         .catch(() => { fetching.current = false; });
     }
@@ -31,19 +32,22 @@ export function GamePage({ sessionId, onEnd }: Props) {
     setPending(null);
   }, [currentIndex]);
 
-  async function handleChoice(chosen: string) {
+  function handleChoice(chosen: string) {
     if (pending || feedback) return;
-    setPending(chosen); // instant visual feedback
+    setPending(chosen);
     const responseTimeMs = Date.now() - startedAt;
-    const result = await api.submitAnswer(sessionId, question.id, chosen, responseTimeMs);
+    const isCorrect = chosen.trim().toLowerCase() === question.answer.trim().toLowerCase();
+    const correctAnswer = question.answer;
+    addPending({ questionId: question.id, userAnswer: chosen, responseTimeMs });
     setPending(null);
-    setFeedback(result);
-    addAnswer({ questionId: question.id, userAnswer: chosen, isCorrect: result.isCorrect, correctAnswer: result.correctAnswer, responseTimeMs });
-    setTimeout(nextQuestion, result.isCorrect ? 600 : 1000);
+    setFeedback({ isCorrect, correctAnswer });
+    addAnswer({ questionId: question.id, userAnswer: chosen, isCorrect, correctAnswer, responseTimeMs });
+    setTimeout(nextQuestion, isCorrect ? 600 : 1000);
   }
 
   async function handleStop() {
-    await api.endSession(sessionId);
+    const toFlush = flushPending();
+    await api.endSession(sessionId, toFlush);
     onEnd();
   }
 

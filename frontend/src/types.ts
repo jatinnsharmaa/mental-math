@@ -6,7 +6,16 @@ export type Question = {
   category: Category;
   difficulty: Difficulty;
   prompt: string;
+  answer: string;
   options: string[];
+};
+
+export type MistakeSummary = {
+  prompt: string;
+  category: string;
+  difficulty: string;
+  answer: string;
+  wrongCount: number;
 };
 
 export type SessionAnswer = {

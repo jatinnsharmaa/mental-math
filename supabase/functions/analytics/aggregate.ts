@@ -42,6 +42,35 @@ export function aggregateAnswers(answers: AnswerRow[]) {
   return { totalAnswered: total, accuracy, avgResponseMs, byCategory: summarise(byCategory), byDifficulty: summarise(byDifficulty) };
 }
 
+type MistakeRow = {
+  questionId: number;
+  question: { prompt: string; category: string; difficulty: string; answer: string };
+};
+
+export type MistakeSummary = {
+  prompt: string;
+  category: string;
+  difficulty: string;
+  answer: string;
+  wrongCount: number;
+};
+
+export function groupByQuestion(rows: MistakeRow[]): MistakeSummary[] {
+  const byQ = new Map<number, MistakeSummary & { questionId: number }>();
+  for (const r of rows) {
+    if (!r.question) continue;
+    const existing = byQ.get(r.questionId);
+    if (existing) {
+      existing.wrongCount++;
+    } else {
+      byQ.set(r.questionId, { questionId: r.questionId, ...r.question, wrongCount: 1 });
+    }
+  }
+  return [...byQ.values()]
+    .sort((a, b) => b.wrongCount - a.wrongCount)
+    .map(({ questionId: _id, ...rest }) => rest);
+}
+
 export function groupByDay(answers: Pick<AnswerRow, 'isCorrect' | 'responseTimeMs' | 'answeredAt'>[]) {
   const byDay: Record<string, { total: number; correct: number; totalMs: number }> = {};
   for (const a of answers) {

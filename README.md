@@ -6,9 +6,10 @@ A fast, focused mental math drill app. Pick your categories, pick a difficulty, 
 
 - **Five categories:** Multiplication tables, Prime number recognition, Squares & Cubes, Square/Cube roots, Fractions
 - **Three difficulty levels:** Easy, Medium, Hard — select any combination
-- **Endless mode:** Questions keep coming until you stop. A new batch is prefetched in the background as you work through the current one
-- **Instant feedback:** Clicking an answer highlights it immediately (before the server responds), then shows correct/incorrect
+- **Endless mode:** Questions keep coming until you stop. 80 questions are fetched upfront; the next batch is prefetched seamlessly in the background
+- **Instant feedback:** Clicking an answer highlights it immediately and shows correct/incorrect — no round-trip to the server
 - **Analytics dashboard:** Accuracy %, average response time, and breakdowns by category and difficulty — charted over 7, 14, or 30 days
+- **Mistakes review:** See which specific questions you got wrong, how many times, filtered by category/difficulty and over 7 or 30-day windows
 
 ## Stack
 
@@ -35,10 +36,10 @@ A fast, focused mental math drill app. Pick your categories, pick a difficulty, 
 
 The app has no traditional backend server. All API logic runs in two Supabase Edge Functions:
 
-- **`sessions`** — creates sessions, serves question batches, records answers, ends sessions
-- **`analytics`** — aggregates answer history into summary stats and daily breakdowns
+- **`sessions`** — creates sessions, serves question batches (80 per batch), accepts batched answer submissions, ends sessions
+- **`analytics`** — aggregates answer history into summary stats, daily breakdowns, and per-question mistake frequency
 
-The question bank (962 questions across all categories and difficulties) lives in Postgres and is seeded once from `seed.ts`. Questions are never exposed with their answers — correctness is evaluated server-side only.
+The question bank (962 questions across all categories and difficulties) lives in Postgres and is seeded once from `seed.ts`. Answers are submitted in batches (piggybacked on the next-batch prefetch and the session-end request), reducing API calls from ~105 to ~3 per 100-question session.
 
 ## Project structure
 

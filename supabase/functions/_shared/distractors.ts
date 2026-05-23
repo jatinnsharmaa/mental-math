@@ -59,6 +59,7 @@ export function formatQuestion(q: {
     category: q.category,
     difficulty: q.difficulty,
     prompt: q.prompt,
+    answer: q.answer,
     options: generateOptions(q.category, q.answer),
   };
 }

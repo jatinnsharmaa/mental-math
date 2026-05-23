@@ -57,10 +57,10 @@ Deno.test('fractions: 4 options including correct answer', () => {
   assert(opts.includes('0.25'));
 });
 
-Deno.test('formatQuestion strips answer field and adds options', () => {
+Deno.test('formatQuestion includes answer field and adds options', () => {
   const q = { id: 1, category: 'multiplication', difficulty: 'easy', prompt: '7 × 8 = ?', answer: '56' };
   const formatted = formatQuestion(q);
-  assert(!('answer' in formatted));
+  assertEquals(formatted.answer, '56');
   assertEquals(formatted.options.length, 4);
   assert(formatted.options.includes('56'));
   assertEquals(formatted.id, 1);

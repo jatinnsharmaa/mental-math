@@ -1,7 +1,7 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { verifyToken } from '../_shared/auth.ts';
 import { getServiceClient } from '../_shared/db.ts';
-import { aggregateAnswers, groupByDay, type AnswerRow } from './aggregate.ts';
+import { aggregateAnswers, groupByDay, groupByQuestion, type AnswerRow } from './aggregate.ts';
 
 Deno.serve(async (req) => {
   const cors = handleCors(req);
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   }
 
   if (url.pathname.endsWith('/daily')) {
-    const days = parseInt(url.searchParams.get('days') ?? '7');
+    const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') ?? '') || 7));
     const since = new Date();
     since.setDate(since.getDate() - days);
 
@@ -48,6 +48,38 @@ Deno.serve(async (req) => {
       .order('answeredAt');
 
     return new Response(JSON.stringify({ daily: groupByDay(answers ?? []) }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (url.pathname.endsWith('/mistakes')) {
+    const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') ?? '') || 30));
+    const category = url.searchParams.get('category');
+    const difficulty = url.searchParams.get('difficulty');
+
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data: sessions } = await supabase.from('Session').select('id').eq('userId', user.userId);
+    const sessionIds = (sessions ?? []).map((s: { id: number }) => s.id);
+    if (!sessionIds.length) {
+      return new Response(JSON.stringify({ mistakes: [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const { data: rows } = await supabase
+      .from('SessionAnswer')
+      .select('questionId, question:Question(prompt, category, difficulty, answer)')
+      .in('sessionId', sessionIds)
+      .eq('isCorrect', false)
+      .gte('answeredAt', since.toISOString());
+
+    const all = groupByQuestion((rows ?? []) as Parameters<typeof groupByQuestion>[0]);
+    const filtered = all.filter(m =>
+      (!category || m.category === category) &&
+      (!difficulty || m.difficulty === difficulty)
+    );
+
+    return new Response(JSON.stringify({ mistakes: filtered }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
