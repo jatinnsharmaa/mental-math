@@ -1,0 +1,25 @@
+{
+  "name": "mental_math",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "prisma": "^5.22.0",
+    "supabase": "^2.101.0",
+    "tsx": "^4.22.3",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  }
+}
