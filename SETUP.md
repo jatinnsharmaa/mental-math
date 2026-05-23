@@ -78,7 +78,7 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authenticated, service
 npx tsx seed.ts
 ```
 
-This inserts 1,107 questions across all categories and difficulties. It's idempotent — safe to run again if something goes wrong.
+This inserts 962 questions across all categories and difficulties. It clears all existing sessions and answers first (to avoid foreign key conflicts), then re-seeds — safe to run again if something goes wrong.
 
 ---
 
@@ -174,6 +174,8 @@ Questions are generated in `seed.ts` via the `buildQuestions()` function. Each q
 
 To add a new category:
 1. Add question generation logic to `buildQuestions()` in `seed.ts`
-2. Add delta values for distractor generation in `_shared/distractors.ts`
+2. Update distractor generation in `_shared/distractors.ts`:
+   - Integer-answer categories (like squares_cubes, multiplication): use the `correct ± k×10` block — options automatically share the correct answer's last digit
+   - Decimal-answer categories (like roots, fractions): add an entry to the `deltas` map with appropriate decimal offsets
 3. Add the category to `CATEGORIES` in `frontend/src/components/SessionConfig.tsx`
 4. Re-run `npx tsx seed.ts`

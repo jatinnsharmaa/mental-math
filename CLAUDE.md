@@ -14,7 +14,7 @@ Mental math drill game. Players pick categories and difficulty, then answer mult
 ```
 /                        # Root — Prisma schema, seed script, root tests
   prisma/schema.prisma   # DB schema (Question, Session, SessionAnswer)
-  seed.ts                # Seeds 1107 questions; export buildQuestions() for tests
+  seed.ts                # Seeds 962 questions; export buildQuestions() for tests
   seed.test.ts           # Root-level Vitest tests for seeder
   vitest.config.ts       # Root Vitest config (node env, *.test.ts)
 
@@ -48,7 +48,7 @@ frontend/src/
 ### Root (seed + schema)
 ```bash
 npx prisma db push          # Apply schema to Supabase Postgres
-npx tsx seed.ts             # Seed 1107 questions (idempotent — clears first)
+npx tsx seed.ts             # Seed 962 questions (clears SessionAnswer, Session, Question first)
 npx vitest run              # Run root-level tests (seed.test.ts)
 npx vitest run seed.test.ts # Run a single root test file
 ```
@@ -98,7 +98,10 @@ Checked server-side in the Edge Function: `userAnswer.trim().toLowerCase() === q
 Every session route (`next`, `answers`, `end`) fetches the session with both `.eq('id', sessionId)` **and** `.eq('userId', user.userId)` before acting on it. Returns 404 on mismatch (not 403, to avoid confirming the session exists). Do not add new session routes without this check.
 
 ### Options generation
-`_shared/distractors.ts` generates 3 wrong answers by adding/subtracting deltas specific to each category, then shuffles all four. **Exception: primes always returns `['yes', 'no']` in that fixed order — never shuffled.**
+`_shared/distractors.ts` generates 3 wrong answers then shuffles all four. Strategy varies by category:
+- **`primes`** — always returns `['yes', 'no']` in that fixed order (never shuffled).
+- **`squares_cubes` and `multiplication`** — distractors are `correct ± k×10` (k=1,2,3…) so every option shares the same last digit as the correct answer. Prevents process-of-elimination via the last-digit shortcut.
+- **`roots` and `fractions`** — category-specific decimal delta arrays (e.g. `[0.05, 0.1, ...]`).
 
 ### Prisma is local-only
 Prisma is used only for schema management (`prisma db push`) and seeding (`seed.ts`). The Edge Functions use the Supabase JS client directly at runtime — Prisma is never imported in Edge Function code.
@@ -119,6 +122,8 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authenticated, service
 | `frontend/.env.production` | Prod — same vars with `VITE_API_URL=https://ygaazafwwfrlaiuybnxn.supabase.co/functions/v1` |
 
 `VITE_SUPABASE_PUBLISHABLE_KEY` is the correct env var name (not `ANON_KEY`).
+
+> **Important:** `frontend/.env.production` is gitignored and never committed. Production env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_API_URL`) must be set directly in the Vercel project settings (Dashboard → Project → Settings → Environment Variables). Without them the deployed build will have `BASE = undefined` and all API calls will fail.
 
 ## Testing notes
 

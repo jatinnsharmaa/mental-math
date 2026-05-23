@@ -38,7 +38,7 @@ The app has no traditional backend server. All API logic runs in two Supabase Ed
 - **`sessions`** — creates sessions, serves question batches, records answers, ends sessions
 - **`analytics`** — aggregates answer history into summary stats and daily breakdowns
 
-The question bank (1,107 questions across all categories and difficulties) lives in Postgres and is seeded once from `seed.ts`. Questions are never exposed with their answers — correctness is evaluated server-side only.
+The question bank (962 questions across all categories and difficulties) lives in Postgres and is seeded once from `seed.ts`. Questions are never exposed with their answers — correctness is evaluated server-side only.
 
 ## Project structure
 
