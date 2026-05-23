@@ -41,7 +41,12 @@ Deno.serve(async (req) => {
       .insert({ userId: user.userId, categories: JSON.stringify(categories), difficulties: JSON.stringify(difficulties) })
       .select('id').single();
     if (error) return new Response(JSON.stringify({ error: 'Internal error' }), { status: 500, headers: corsHeaders });
-    const questions = await fetchBatch(supabase, categories, difficulties);
+    let questions;
+    try {
+      questions = await fetchBatch(supabase, categories, difficulties);
+    } catch (e) {
+      return new Response(JSON.stringify({ error: (e as Error).message ?? 'Failed to fetch questions' }), { status: 500, headers: corsHeaders });
+    }
     return new Response(JSON.stringify({ sessionId: session.id, questions }), {
       status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

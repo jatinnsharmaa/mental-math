@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -10,8 +10,10 @@ import { DashboardPage } from './pages/DashboardPage';
 type Screen = 'login' | 'signup' | 'home' | 'game' | 'results' | 'dashboard';
 
 export default function App() {
-  const { user } = useAuthStore();
+  const { user, restoreSession } = useAuthStore();
   const [screen, setScreen] = useState<Screen>(user ? 'home' : 'login');
+
+  useEffect(() => { restoreSession(); }, []);
   const [sessionId, setSessionId] = useState<number | null>(null);
 
   if (!user) {

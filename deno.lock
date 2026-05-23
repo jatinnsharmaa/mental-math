@@ -20,6 +20,7 @@
       "dependencies": [
         "npm:@prisma/client@^5.22.0",
         "npm:prisma@^5.22.0",
+        "npm:supabase@^2.101.0",
         "npm:tsx@^4.22.3",
         "npm:vitest@^4.1.7"
       ]

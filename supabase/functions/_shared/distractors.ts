@@ -5,14 +5,29 @@ function shuffle<T>(arr: T[]): T[] {
 export function generateOptions(category: string, answer: string): string[] {
   if (category === 'primes') return ['yes', 'no'];
 
+  if (category === 'squares_cubes' || category === 'multiplication') {
+    const correct = parseInt(answer);
+    const wrongs = new Set<string>();
+    let k = 1;
+    while (wrongs.size < 3) {
+      for (const sign of [1, -1]) {
+        const candidate = correct + sign * k * 10;
+        if (candidate > 0 && String(candidate) !== answer) {
+          wrongs.add(String(candidate));
+          if (wrongs.size === 3) break;
+        }
+      }
+      k++;
+    }
+    return shuffle([answer, ...Array.from(wrongs)]);
+  }
+
   const correct = parseFloat(answer);
   const wrongs = new Set<string>();
 
   const deltas: Record<string, number[]> = {
-    multiplication: [2, 3, 5, 7, 10, 12, 15, 20],
-    squares_cubes:  [1, 2, 4, 8, 15, 25, 30, 50],
-    roots:          [0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
-    fractions:      [0.03, 0.05, 0.07, 0.1, 0.12, 0.15],
+    roots:     [0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
+    fractions: [0.03, 0.05, 0.07, 0.1, 0.12, 0.15],
   };
 
   for (const d of shuffle(deltas[category] ?? [1, 2, 3, 5])) {

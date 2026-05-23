@@ -2,6 +2,10 @@ import { useAuthStore } from '../stores/authStore';
 
 const BASE = import.meta.env.VITE_API_URL as string;
 
+if (!BASE) {
+  console.error('VITE_API_URL is not set — all API calls will fail. Check Vercel environment variables.');
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = useAuthStore.getState().token;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -13,8 +17,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error: string }).error ?? 'Request failed');
+    const err = await res.json().catch(() => ({}));
+    const msg = (err as Record<string, unknown>).error
+      ?? (err as Record<string, unknown>).message
+      ?? (res.statusText || `HTTP ${res.status}`);
+    throw new Error(msg as string);
   }
   return res.json() as Promise<T>;
 }
