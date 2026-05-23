@@ -36,7 +36,7 @@ export function HomePage({ onStart, onDashboard }: Props) {
             <p className="text-sm text-gray-500">{user?.name || user?.email}</p>
           </div>
           <div className="flex gap-4">
-            <button onClick={onDashboard} className="text-sm text-gray-600 hover:text-gray-900">Stats</button>
+            <button onClick={onDashboard} className="text-sm text-gray-600 hover:text-gray-900">Analytics</button>
             <button onClick={logout} className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
           </div>
         </div>
