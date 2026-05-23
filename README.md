@@ -26,6 +26,11 @@ A fast, focused mental math drill app. Pick your categories, pick a difficulty, 
 
 **https://mental-math-jatin.vercel.app**
 
+<img width="1080" height="2376" alt="WhatsApp Image 2026-05-23 at 11 31 39" src="https://github.com/user-attachments/assets/9cf8e324-f9b4-4877-81f0-dc152c97be61" />
+<img width="727" height="1600" alt="WhatsApp Image 2026-05-23 at 11 31 40" src="https://github.com/user-attachments/assets/7f26a05a-e84f-4ff5-b2a5-8da4c5076b20" />
+<img width="1080" height="2376" alt="WhatsApp Image 2026-05-23 at 11 31 02" src="https://github.com/user-attachments/assets/fe46ec55-aacb-439a-baf8-bae282f71f36" />
+
+
 ## How it works
 
 The app has no traditional backend server. All API logic runs in two Supabase Edge Functions:
