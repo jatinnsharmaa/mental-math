@@ -27,9 +27,7 @@ A fast, focused mental math drill app. Pick your categories, pick a difficulty, 
 
 **https://mental-math-jatin.vercel.app**
 
-
-<img width="727" height="1600" alt="WhatsApp Image 2026-05-23 at 11 31 40" src="https://github.com/user-attachments/assets/7f26a05a-e84f-4ff5-b2a5-8da4c5076b20" />
-<img width="727" height="1600" alt="WhatsApp Image 2026-05-23 at 11 31 02" src="https://github.com/user-attachments/assets/fe46ec55-aacb-439a-baf8-bae282f71f36" />
+<img width="960" height="540" alt="Manifestation, Principles, Goals (4)" src="https://github.com/user-attachments/assets/28032cb7-fb53-4bf7-b7ac-ae50708e9231" />
 
 
 ## How it works
