@@ -22,3 +22,15 @@ Quick tests for whether N is divisible by d — no long division needed.
 ---
 
 **Tip:** for 7 and 13, if the "repeat" step still leaves a number too big to eyeball, apply the same rule again — it converges fast.
+
+## Repeating the rule: worked examples
+
+**Is 6,293 divisible by 7?** (double last digit, subtract from rest)
+1. 6293 → 629 − (3×2) = 629 − 6 = **623**
+2. 623 → 62 − (3×2) = 62 − 6 = **56**
+3. 56 ÷ 7 = 8 → divisible.
+
+**Is 7,813 divisible by 13?** (4× last digit, add to rest)
+1. 7813 → 781 + (3×4) = 781 + 12 = **793**
+2. 793 → 79 + (3×4) = 79 + 12 = **91**
+3. 91 ÷ 13 = 7 → divisible.
